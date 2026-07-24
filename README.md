@@ -13,7 +13,7 @@ SDK, CLI, mock server, MCP server and external integration.
 | `openapi/corelink-internal-v1.yaml` | Internal service contract; never expose as public API |
 | `asyncapi/corelink-events-v1.yaml` | Published event channels and payloads |
 | `schemas/` | Reusable JSON Schemas for device, command, event envelope and errors |
-| `postman/` | Collections, environments and runnable examples |
+| `postman/` | Versioned collection, sandbox environment and runnable examples |
 | `docs/terminology.md` | Shared public-contract vocabulary |
 
 ## Current status
@@ -47,3 +47,6 @@ public operation.
 3. Add representative request, response and error examples.
 4. Update affected SDK, mock-server, developer-docs and website references in
    the same delivery plan.
+5. Let the contract-compatibility workflow classify the public diff. It rejects
+   breaking v1 changes; publish a new major document with migration guidance
+   for any such change.

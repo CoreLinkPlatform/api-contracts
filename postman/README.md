@@ -3,11 +3,17 @@
 Postman collections, environments and request examples for the versioned
 CoreLink public contracts.
 
-## Current status
+## Use in the developer sandbox
 
-This directory is a scaffold. No collection or environment file has been added
-yet, and the OpenAPI specifications in the parent repository are currently
-empty. There is therefore nothing to import or run at this time.
+Import `corelink-public-v1.postman_collection.json` and
+`corelink-public-v1.postman_environment.json`, then set `tenant_id`,
+`corelink_device_id` and an access token obtained through the supported CoreLink
+authentication flow. The collection contains readiness, successful device,
+validation/authentication and idempotent command examples for the resettable
+sandbox tenant; it never needs a vendor identifier or direct integration access.
+
+The collection is pinned to the reviewed `1.0.0-draft` contract. It remains a
+prerelease reference until the public runtime and sandbox are released together.
 
 ## When adding a collection
 

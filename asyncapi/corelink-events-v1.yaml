@@ -1,0 +1,43 @@
+asyncapi: 3.0.0
+info:
+  title: CoreLink Event Contract
+  version: 1.0.0-draft
+  description: Canonical event envelopes for approved public and partner deliveries.
+channels:
+  device.lifecycle:
+    address: device.lifecycle
+    messages:
+      deviceLifecycle:
+        $ref: '#/components/messages/DeviceLifecycle'
+  command.status:
+    address: command.status
+    messages:
+      commandStatus:
+        $ref: '#/components/messages/CommandStatus'
+operations:
+  receiveDeviceLifecycle:
+    action: receive
+    channel: {$ref: '#/channels/device.lifecycle'}
+  receiveCommandStatus:
+    action: receive
+    channel: {$ref: '#/channels/command.status'}
+components:
+  messages:
+    DeviceLifecycle:
+      name: DeviceLifecycle
+      payload: {$ref: '#/components/schemas/EventEnvelope'}
+    CommandStatus:
+      name: CommandStatus
+      payload: {$ref: '#/components/schemas/EventEnvelope'}
+  schemas:
+    EventEnvelope:
+      type: object
+      additionalProperties: false
+      required: [event_id, event_type, occurred_at, tenant_id, data]
+      properties:
+        event_id: {type: string, format: uuid}
+        event_type: {type: string, examples: [command.completed]}
+        occurred_at: {type: string, format: date-time}
+        tenant_id: {type: string, format: uuid}
+        correlation_id: {type: string}
+        data: {type: object, additionalProperties: true}

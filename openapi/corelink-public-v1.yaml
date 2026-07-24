@@ -171,9 +171,10 @@ components:
         corelink_device_id: {type: string, format: uuid}
         tenant_id: {type: string, format: uuid}
         device_model_id: {type: string, format: uuid}
-        partner_sku_id: {type: string, format: uuid}
+        partner_sku_id: {type: [string, 'null'], format: uuid}
         firmware_release_id: {type: [string, 'null'], format: uuid}
         name: {type: [string, 'null'], maxLength: 255}
+        status: {$ref: '#/components/schemas/DeviceStatus'}
         metadata: {type: object, additionalProperties: true}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
@@ -182,6 +183,7 @@ components:
       required: [device_model_id]
       properties:
         device_model_id: {type: string, format: uuid}
+        partner_sku_id: {type: string, format: uuid}
         firmware_release_id: {type: string, format: uuid}
         name: {type: string, maxLength: 255}
         metadata: {type: object, additionalProperties: true}
@@ -191,7 +193,6 @@ components:
       properties:
         firmware_release_id: {type: [string, 'null'], format: uuid}
         name: {type: [string, 'null'], maxLength: 255}
-        status: {$ref: '#/components/schemas/DeviceStatus'}
         metadata: {type: object, additionalProperties: true}
     DevicePage: {type: object, required: [items, total, limit, offset], properties: {items: {type: array, items: {$ref: '#/components/schemas/Device'}}, total: {type: integer}, limit: {type: integer}, offset: {type: integer}}}
     CommandStatus: {type: string, enum: [queued, dispatching, sent, acknowledged, succeeded, failed, timed_out, cancelled]}

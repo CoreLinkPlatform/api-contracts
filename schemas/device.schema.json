@@ -9,6 +9,7 @@
     "corelink_device_id": {"type": "string", "format": "uuid"},
     "tenant_id": {"type": "string", "format": "uuid"},
     "device_model_id": {"type": "string", "format": "uuid"},
+    "partner_sku_id": {"type": ["string", "null"], "format": "uuid"},
     "firmware_release_id": {"type": ["string", "null"], "format": "uuid"},
     "name": {"type": ["string", "null"], "maxLength": 255},
     "status": {"type": "string", "enum": ["inventory", "provisioning", "active", "suspended", "retired"]},

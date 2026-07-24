@@ -171,9 +171,9 @@ components:
         corelink_device_id: {type: string, format: uuid}
         tenant_id: {type: string, format: uuid}
         device_model_id: {type: string, format: uuid}
+        partner_sku_id: {type: string, format: uuid}
         firmware_release_id: {type: [string, 'null'], format: uuid}
         name: {type: [string, 'null'], maxLength: 255}
-        status: {$ref: '#/components/schemas/DeviceStatus'}
         metadata: {type: object, additionalProperties: true}
         created_at: {type: string, format: date-time}
         updated_at: {type: string, format: date-time}
@@ -195,7 +195,7 @@ components:
         metadata: {type: object, additionalProperties: true}
     DevicePage: {type: object, required: [items, total, limit, offset], properties: {items: {type: array, items: {$ref: '#/components/schemas/Device'}}, total: {type: integer}, limit: {type: integer}, offset: {type: integer}}}
     CommandStatus: {type: string, enum: [queued, dispatching, sent, acknowledged, succeeded, failed, timed_out, cancelled]}
-    CommandCreate: {type: object, required: [command_type, connector], properties: {command_type: {type: string, minLength: 1, maxLength: 150}, connector: {type: string, minLength: 1, maxLength: 100, description: CoreLink connector selector. Current supported values are tc and or.}, payload: {type: object, additionalProperties: true}, timeout_at: {type: string, format: date-time}, metadata: {type: object, additionalProperties: true}}}
-    Command: {type: object, required: [command_id, tenant_id, corelink_device_id, command_type, payload, status, attempt_count, created_at, updated_at], properties: {command_id: {type: string, format: uuid}, tenant_id: {type: string, format: uuid}, corelink_device_id: {type: string, format: uuid}, command_type: {type: string}, payload: {type: object, additionalProperties: true}, status: {$ref: '#/components/schemas/CommandStatus'}, attempt_count: {type: integer}, timeout_at: {type: [string, 'null'], format: date-time}, acknowledged_at: {type: [string, 'null'], format: date-time}, completed_at: {type: [string, 'null'], format: date-time}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}}
+    CommandCreate: {type: object, required: [command_type], properties: {command_type: {type: string, minLength: 1, maxLength: 150}, payload: {type: object, additionalProperties: true}, timeout_at: {type: string, format: date-time}, metadata: {type: object, additionalProperties: true}}}
+    Command: {type: object, required: [command_id, tenant_id, corelink_device_id, command_type, payload, status, attempt_count, metadata, created_at, updated_at], properties: {command_id: {type: string, format: uuid}, tenant_id: {type: string, format: uuid}, corelink_device_id: {type: string, format: uuid}, command_type: {type: string}, payload: {type: object, additionalProperties: true}, status: {$ref: '#/components/schemas/CommandStatus'}, attempt_count: {type: integer}, timeout_at: {type: [string, 'null'], format: date-time}, acknowledged_at: {type: [string, 'null'], format: date-time}, completed_at: {type: [string, 'null'], format: date-time}, metadata: {type: object, additionalProperties: true}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}}
     CommandPage: {type: object, required: [items, total, limit, offset], properties: {items: {type: array, items: {$ref: '#/components/schemas/Command'}}, total: {type: integer}, limit: {type: integer}, offset: {type: integer}}}
     Problem: {type: object, required: [type, title, status, code, correlation_id], properties: {type: {type: string}, title: {type: string}, status: {type: integer}, code: {type: string}, detail: {type: string}, correlation_id: {type: string}}}

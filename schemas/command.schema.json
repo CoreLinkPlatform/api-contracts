@@ -11,7 +11,7 @@
     "corelink_device_id": {"type": "string", "format": "uuid"},
     "command_type": {"type": "string", "minLength": 1, "maxLength": 150},
     "payload": {"type": "object", "additionalProperties": true},
-    "status": {"type": "string", "enum": ["queued", "dispatched", "acknowledged", "completed", "failed", "cancelled", "timed_out"]},
+    "status": {"type": "string", "enum": ["queued", "dispatching", "sent", "acknowledged", "succeeded", "failed", "timed_out", "cancelled"]},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}
   }

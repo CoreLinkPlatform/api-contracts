@@ -11,7 +11,7 @@
     "device_model_id": {"type": "string", "format": "uuid"},
     "firmware_release_id": {"type": ["string", "null"], "format": "uuid"},
     "name": {"type": ["string", "null"], "maxLength": 255},
-    "status": {"type": "string", "enum": ["active", "inactive", "retired"]},
+    "status": {"type": "string", "enum": ["inventory", "provisioning", "active", "suspended", "retired"]},
     "metadata": {"type": "object", "additionalProperties": true},
     "created_at": {"type": "string", "format": "date-time"},
     "updated_at": {"type": "string", "format": "date-time"}

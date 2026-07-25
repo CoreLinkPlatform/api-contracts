@@ -25,6 +25,10 @@ administration remain out of public v1 until they have their own reviewed
 contract. SDKs and the mock server may consume this draft only in prerelease
 channels; it is not a release claim until runtime parity and CI checks land.
 
+The immutable baseline tag is `v1.0.0-draft`. See the
+[changelog](CHANGELOG.md) and [compatibility matrix](docs/compatibility-matrix.md)
+for the exact release boundary and consumer status.
+
 ## Contract rules
 
 - Public device identity is `corelink_device_id`; integration IDs remain

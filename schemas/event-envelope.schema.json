@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.corelink.example/schemas/event-envelope.schema.json",
+  "title": "CoreLink Event Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "event_type", "occurred_at", "tenant_id", "data"],
+  "properties": {
+    "event_id": {"type": "string", "format": "uuid"},
+    "event_type": {"type": "string", "pattern": "^[a-z]+(\\.[a-z_]+)+$"},
+    "occurred_at": {"type": "string", "format": "date-time"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "correlation_id": {"type": "string"},
+    "data": {"type": "object", "additionalProperties": true}
+  }
+}

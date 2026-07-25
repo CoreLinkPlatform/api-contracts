@@ -1,0 +1,6 @@
+openapi: 3.1.1
+info:
+  title: CoreLink Administrative API
+  version: 1.0.0-draft
+  description: Reserved for privileged administrative operations; not a public SDK input.
+paths: {}

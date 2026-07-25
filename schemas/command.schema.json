@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.corelink.example/schemas/command.schema.json",
+  "title": "CoreLink Device Command",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["command_id", "tenant_id", "corelink_device_id", "command_type", "payload", "status", "metadata", "created_at", "updated_at"],
+  "properties": {
+    "command_id": {"type": "string", "format": "uuid"},
+    "tenant_id": {"type": "string", "format": "uuid"},
+    "corelink_device_id": {"type": "string", "format": "uuid"},
+    "command_type": {"type": "string", "minLength": 1, "maxLength": 150},
+    "payload": {"type": "object", "additionalProperties": true},
+    "status": {"type": "string", "enum": ["queued", "dispatching", "sent", "acknowledged", "succeeded", "failed", "timed_out", "cancelled"]},
+    "error_code": {"type": ["string", "null"], "maxLength": 100},
+    "metadata": {"type": "object", "additionalProperties": true},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"}
+  }
+}

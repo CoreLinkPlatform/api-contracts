@@ -1,0 +1,71 @@
+{
+  "info": {
+    "name": "CoreLink Public API v1 (draft)",
+    "description": "Reference requests for the public CoreLink Device and Command contract. Import with the matching environment. No vendor identifiers or direct integration access are required.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "https://api.corelink.example" },
+    { "key": "tenant_id", "value": "00000000-0000-0000-0000-000000000001" },
+    { "key": "corelink_device_id", "value": "00000000-0000-0000-0000-000000000101" },
+    { "key": "access_token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Readiness",
+          "request": { "method": "GET", "url": "{{base_url}}/health/ready" },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('returns readiness', function () { pm.expect(pm.response.code).to.eql(200); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Devices",
+      "item": [
+        {
+          "name": "List tenant devices",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tenants/{{tenant_id}}/devices?limit=20&offset=0"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('returns a device page', function () { pm.expect(pm.response.code).to.eql(200); });"] } }]
+        },
+        {
+          "name": "Get one device",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tenants/{{tenant_id}}/devices/{{corelink_device_id}}"
+          }
+        },
+        {
+          "name": "Validation example (missing token)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/v1/tenants/{{tenant_id}}/devices?limit=0"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('returns a public problem response', function () { pm.expect([400, 401]).to.include(pm.response.code); });"] } }]
+        }
+      ]
+    },
+    {
+      "name": "Commands",
+      "item": [
+        {
+          "name": "Create idempotent command",
+          "request": {
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }] },
+            "method": "POST",
+            "header": [{ "key": "Idempotency-Key", "value": "sandbox-command-{{corelink_device_id}}", "type": "text" }, { "key": "Content-Type", "value": "application/json", "type": "text" }],
+            "body": { "mode": "raw", "raw": "{\n  \"command_type\": \"sandbox.ping\",\n  \"payload\": {}\n}", "options": { "raw": { "language": "json" } } },
+            "url": "{{base_url}}/api/v1/tenants/{{tenant_id}}/devices/{{corelink_device_id}}/commands"
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('accepts the idempotent command', function () { pm.expect(pm.response.code).to.eql(201); });"] } }]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+asyncapi: 2.6.0
+info:
+  title: CoreLink Event Contracts
+  version: 1.0.0-draft
+  description: Draft event envelope for the locally verified command flow. Not a stable release contract.
+  x-maturity: draft
+defaultContentType: application/json
+channels:
+  corelink.device.command.v1:
+    description: Versioned command events partitioned by canonical device_id.
+    publish:
+      operationId: publishDeviceCommandEvent
+      message:
+        $ref: '#/components/messages/DeviceCommandEvent'
+components:
+  messages:
+    DeviceCommandEvent:
+      name: DeviceCommandEvent
+      title: Device command event
+      summary: Immutable event envelope for a device command lifecycle.
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/EventEnvelope'
+  schemas:
+    EventEnvelope:
+      type: object
+      required: [id, type, version, occurred_at, tenant_id, correlation_id, payload, metadata]
+      properties:
+        id: {type: string, format: uuid}
+        type: {type: string, enum: [device.command.requested, device.command.acknowledged]}
+        version: {type: string, const: v1}
+        occurred_at: {type: string, format: date-time}
+        tenant_id: {type: string, format: uuid}
+        device_id: {type: string, format: uuid}
+        actor_id: {type: string, format: uuid, nullable: true}
+        correlation_id: {type: string, format: uuid}
+        causation_id: {type: string, format: uuid, nullable: true}
+        source:
+          type: object
+          required: [system, connector, instance]
+          properties:
+            system: {type: string}
+            connector: {type: string}
+            instance: {type: string}
+        payload: {type: object, additionalProperties: true}
+        metadata: {type: object, additionalProperties: true}

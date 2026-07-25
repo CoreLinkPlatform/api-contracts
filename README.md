@@ -18,16 +18,20 @@ SDK, CLI, mock server, MCP server and external integration.
 
 ## Current status
 
-The repository structure and JSON Schemas are present, but the OpenAPI and
-AsyncAPI specification files are currently empty. They are not usable as
-generated-client or mock-server inputs yet. Do not publish an SDK or claim API
-compatibility until a reviewed, versioned specification exists.
+The public OpenAPI document now contains a reviewed draft for the locally
+verified Tenant → Device → Provisioning → Command slice, and AsyncAPI contains
+a draft command-event envelope. The admin and internal documents remain
+incomplete. These drafts are not stable release
+contract and must not be used to publish an SDK or claim full API
+compatibility until API-01/API-02 acceptance and cross-repository validation
+are complete.
 
 ## Contract rules
 
 - Public device identity is `corelink_device_id`; integration IDs remain
   internal implementation details.
-- Model CoreLink resources, not raw Traccar, OpenRemote or Keycloak payloads.
+- Model CoreLink resources, not raw upstream-provider payloads. Public
+  terminology uses neutral CoreLink names and the `tc`/`or` codes only.
 - Keep public, admin and internal audiences in separate documents.
 - Define authentication, tenant scope, authorization failures, pagination,
   idempotency and problem responses for every operation.

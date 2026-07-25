@@ -16,3 +16,7 @@ No TypeScript or Python package may be promoted beyond prerelease until these
 items, a contract-diff check and generated-client compatibility tests are
 green. This gate preserves current consumers while the public boundary is
 normalized.
+
+The repository workflow also runs `scripts/lint_contracts.rb` and parses the
+versioned Postman collection/environment. This is an early structural gate; it
+does not replace runtime parity or generated-client tests.

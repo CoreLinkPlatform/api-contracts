@@ -1,184 +1,204 @@
-openapi: 3.1.0
+openapi: 3.1.1
 info:
   title: CoreLink Public API
   version: 1.0.0-draft
-  description: Draft contract for the locally verified connected-device foundation. Not a stable release contract.
-  x-maturity: draft
+  description: |
+    Versioned public contract for the proven connected-device slice. Integration
+    details are deliberately excluded. All resource identifiers are canonical
+    CoreLink identifiers.
 servers:
-  - url: http://localhost:8000
-    description: Local development only
+  - url: https://api.corelink.example
 security:
   - bearerAuth: []
+tags:
+  - name: Devices
+  - name: Commands
 paths:
-  /api/v1/tenants:
-    post:
-      summary: Create a tenant
-      operationId: createTenant
-      tags: [tenants]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/TenantCreate'}
+  /health/live:
+    get:
+      operationId: getLiveHealth
+      security: []
+      x-corelink-stability: stable
       responses:
-        '201':
-          description: Tenant created
-          content: {application/json: {schema: {$ref: '#/components/schemas/Tenant'}}}
-        '401': {$ref: '#/components/responses/Unauthorized'}
+        '200':
+          description: Process is live.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+  /health/ready:
+    get:
+      operationId: getReadiness
+      security: []
+      x-corelink-stability: stable
+      responses:
+        '200':
+          description: Dependencies required for traffic are ready.
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/Health'}
+        '503': {$ref: '#/components/responses/ServiceUnavailable'}
   /api/v1/tenants/{tenant_id}/devices:
     parameters:
       - $ref: '#/components/parameters/TenantId'
+    get:
+      tags: [Devices]
+      operationId: listDevices
+      x-corelink-stability: stable
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+        - name: status
+          in: query
+          schema: {$ref: '#/components/schemas/DeviceStatus'}
+        - name: device_model_id
+          in: query
+          schema: {type: string, format: uuid}
+      responses:
+        '200':
+          description: Tenant-scoped device page.
+          content: {application/json: {schema: {$ref: '#/components/schemas/DevicePage'}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
     post:
-      summary: Register a canonical device
+      tags: [Devices]
       operationId: createDevice
-      tags: [devices]
+      x-corelink-stability: stable
       requestBody:
         required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/DeviceCreate'}
+        content: {application/json: {schema: {$ref: '#/components/schemas/DeviceCreate'}}}
       responses:
-        '201':
-          description: Device created
-          content: {application/json: {schema: {$ref: '#/components/schemas/Device'}}}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '403': {$ref: '#/components/responses/Forbidden'}
-  /api/v1/tenants/{tenant_id}/devices/{device_id}/provisioning:
-    parameters:
-      - $ref: '#/components/parameters/TenantId'
-      - $ref: '#/components/parameters/DeviceId'
-    post:
-      summary: Start or replay device provisioning
-      operationId: startProvisioning
-      tags: [provisioning]
-      parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
-      requestBody:
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/ProvisioningStart'}
-      responses:
-        '201':
-          description: Provisioning record created or replayed
-          content: {application/json: {schema: {$ref: '#/components/schemas/Provisioning'}}}
-        '401': {$ref: '#/components/responses/Unauthorized'}
-        '409': {$ref: '#/components/responses/Conflict'}
-  /api/v1/tenants/{tenant_id}/devices/{device_id}/commands:
-    parameters:
-      - $ref: '#/components/parameters/TenantId'
-      - $ref: '#/components/parameters/DeviceId'
-    post:
-      summary: Queue a device command
-      operationId: createCommand
-      tags: [commands]
-      parameters:
-        - $ref: '#/components/parameters/IdempotencyKey'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: {$ref: '#/components/schemas/CommandCreate'}
-      responses:
-        '201':
-          description: Command queued
-          content: {application/json: {schema: {$ref: '#/components/schemas/Command'}}}
+        '201': {description: Device created, content: {application/json: {schema: {$ref: '#/components/schemas/Device'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
         '401': {$ref: '#/components/responses/Unauthorized'}
         '403': {$ref: '#/components/responses/Forbidden'}
         '409': {$ref: '#/components/responses/Conflict'}
+  /api/v1/tenants/{tenant_id}/devices/{corelink_device_id}:
+    parameters:
+      - $ref: '#/components/parameters/TenantId'
+      - $ref: '#/components/parameters/CoreLinkDeviceId'
+    get:
+      tags: [Devices]
+      operationId: getDevice
+      x-corelink-stability: stable
+      responses:
+        '200': {description: Device, content: {application/json: {schema: {$ref: '#/components/schemas/Device'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    patch:
+      tags: [Devices]
+      operationId: updateDevice
+      x-corelink-stability: stable
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/DeviceUpdate'}}}
+      responses:
+        '200': {description: Updated device, content: {application/json: {schema: {$ref: '#/components/schemas/Device'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+  /api/v1/tenants/{tenant_id}/devices/{corelink_device_id}/commands:
+    parameters:
+      - $ref: '#/components/parameters/TenantId'
+      - $ref: '#/components/parameters/CoreLinkDeviceId'
+    get:
+      tags: [Commands]
+      operationId: listDeviceCommands
+      x-corelink-stability: stable
+      parameters:
+        - $ref: '#/components/parameters/Limit'
+        - $ref: '#/components/parameters/Offset'
+      responses:
+        '200': {description: Tenant-scoped command page, content: {application/json: {schema: {$ref: '#/components/schemas/CommandPage'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+    post:
+      tags: [Commands]
+      operationId: createDeviceCommand
+      x-corelink-stability: stable
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          required: true
+          schema: {type: string, minLength: 1, maxLength: 255}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/CommandCreate'}}}
+      responses:
+        '201': {description: Command accepted, content: {application/json: {schema: {$ref: '#/components/schemas/Command'}}}}
+        '400': {$ref: '#/components/responses/BadRequest'}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /api/v1/tenants/{tenant_id}/devices/{corelink_device_id}/commands/{command_id}:
+    parameters:
+      - $ref: '#/components/parameters/TenantId'
+      - $ref: '#/components/parameters/CoreLinkDeviceId'
+      - $ref: '#/components/parameters/CommandId'
+    get:
+      tags: [Commands]
+      operationId: getDeviceCommand
+      x-corelink-stability: stable
+      responses:
+        '200': {description: Command, content: {application/json: {schema: {$ref: '#/components/schemas/Command'}}}}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '403': {$ref: '#/components/responses/Forbidden'}
+        '404': {$ref: '#/components/responses/NotFound'}
 components:
   securitySchemes:
     bearerAuth: {type: http, scheme: bearer, bearerFormat: JWT}
   parameters:
     TenantId: {name: tenant_id, in: path, required: true, schema: {type: string, format: uuid}}
-    DeviceId: {name: device_id, in: path, required: true, schema: {type: string, format: uuid}}
-    IdempotencyKey: {name: Idempotency-Key, in: header, required: true, schema: {type: string, minLength: 1, maxLength: 255}}
+    CoreLinkDeviceId: {name: corelink_device_id, in: path, required: true, schema: {type: string, format: uuid}}
+    CommandId: {name: command_id, in: path, required: true, schema: {type: string, format: uuid}}
+    Limit: {name: limit, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 50}}
+    Offset: {name: offset, in: query, schema: {type: integer, minimum: 0, default: 0}}
   responses:
-    Unauthorized:
-      description: Bearer authentication is required
-      content: {application/json: {schema: {$ref: '#/components/schemas/Problem'}}}
-    Forbidden:
-      description: The actor lacks the tenant permission
-      content: {application/json: {schema: {$ref: '#/components/schemas/Problem'}}}
-    Conflict:
-      description: Idempotency or lifecycle conflict
-      content: {application/json: {schema: {$ref: '#/components/schemas/Problem'}}}
+    BadRequest: {description: Invalid request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
+    Unauthorized: {description: Authentication required, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
+    Forbidden: {description: Tenant access or permission denied, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
+    NotFound: {description: Resource not found, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
+    Conflict: {description: Conflicting request, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
+    ServiceUnavailable: {description: Dependency unavailable, content: {application/problem+json: {schema: {$ref: '#/components/schemas/Problem'}}}}
   schemas:
-    TenantCreate:
+    Health: {type: object, required: [status], properties: {status: {type: string, enum: [ok, ready]}}}
+    DeviceStatus: {type: string, enum: [inventory, provisioning, active, suspended, retired]}
+    Device:
       type: object
-      required: [name, slug]
+      required: [corelink_device_id, tenant_id, device_model_id, status, metadata, created_at, updated_at]
       properties:
-        name: {type: string, minLength: 2, maxLength: 255}
-        slug: {type: string, minLength: 2, maxLength: 100, pattern: '^[a-z0-9-]+$'}
-        tenant_type: {type: string, enum: [customer, partner, reseller, platform], default: customer}
-    Tenant:
-      allOf:
-        - {$ref: '#/components/schemas/TenantCreate'}
-        - type: object
-          required: [id, status]
-          properties:
-            id: {type: string, format: uuid}
-            status: {type: string, enum: [active, suspended, archived]}
+        corelink_device_id: {type: string, format: uuid}
+        tenant_id: {type: string, format: uuid}
+        device_model_id: {type: string, format: uuid}
+        partner_sku_id: {type: [string, 'null'], format: uuid}
+        firmware_release_id: {type: [string, 'null'], format: uuid}
+        name: {type: [string, 'null'], maxLength: 255}
+        status: {$ref: '#/components/schemas/DeviceStatus'}
+        metadata: {type: object, additionalProperties: true}
+        created_at: {type: string, format: date-time}
+        updated_at: {type: string, format: date-time}
     DeviceCreate:
       type: object
       required: [device_model_id]
       properties:
         device_model_id: {type: string, format: uuid}
-        name: {type: string, maxLength: 255, nullable: true}
+        partner_sku_id: {type: string, format: uuid}
+        firmware_release_id: {type: string, format: uuid}
+        name: {type: string, maxLength: 255}
         metadata: {type: object, additionalProperties: true}
-        identities:
-          type: array
-          items:
-            type: object
-            required: [identity_type, value]
-            properties:
-              identity_type: {type: string, enum: [imei, iccid, mac, eui64, serial, external]}
-              value: {type: string, minLength: 1, maxLength: 255}
-              is_primary: {type: boolean, default: false}
-    Device:
+    DeviceUpdate:
       type: object
-      required: [id, tenant_id, device_model_id, status]
+      minProperties: 1
       properties:
-        id: {type: string, format: uuid}
-        tenant_id: {type: string, format: uuid}
-        device_model_id: {type: string, format: uuid}
-        name: {type: string, nullable: true}
-        status: {type: string, enum: [inventory, provisioning, active, suspended, retired]}
+        firmware_release_id: {type: [string, 'null'], format: uuid}
+        name: {type: [string, 'null'], maxLength: 255}
         metadata: {type: object, additionalProperties: true}
-    ProvisioningStart:
-      type: object
-      properties:
-        metadata: {type: object, additionalProperties: true}
-    Provisioning:
-      type: object
-      required: [id, tenant_id, device_id, state, metadata]
-      properties:
-        id: {type: string, format: uuid}
-        tenant_id: {type: string, format: uuid}
-        device_id: {type: string, format: uuid}
-        state: {type: string, enum: [unprovisioned, pending, provisioning, active, failed, revoked]}
-        metadata: {type: object, additionalProperties: true}
-    CommandCreate:
-      type: object
-      required: [command_type, provider]
-      properties:
-        command_type: {type: string, minLength: 1, maxLength: 150}
-        provider: {type: string, enum: [tc, or]}
-        payload: {type: object, additionalProperties: true}
-        metadata: {type: object, additionalProperties: true}
-    Command:
-      type: object
-      required: [id, tenant_id, device_id, command_type, provider, status]
-      properties:
-        id: {type: string, format: uuid}
-        tenant_id: {type: string, format: uuid}
-        device_id: {type: string, format: uuid}
-        command_type: {type: string}
-        provider: {type: string, enum: [tc, or]}
-        status: {type: string, enum: [queued, dispatching, sent, acknowledged, succeeded, failed, timed_out, cancelled]}
-        payload: {type: object, additionalProperties: true}
-        metadata: {type: object, additionalProperties: true}
-    Problem:
-      type: object
-      required: [detail]
-      properties:
-        detail: {type: string}
+    DevicePage: {type: object, required: [items, total, limit, offset], properties: {items: {type: array, items: {$ref: '#/components/schemas/Device'}}, total: {type: integer}, limit: {type: integer}, offset: {type: integer}}}
+    CommandStatus: {type: string, enum: [queued, dispatching, sent, acknowledged, succeeded, failed, timed_out, cancelled]}
+    CommandCreate: {type: object, required: [command_type], properties: {command_type: {type: string, minLength: 1, maxLength: 150}, payload: {type: object, additionalProperties: true}, timeout_at: {type: string, format: date-time}, metadata: {type: object, additionalProperties: true}}}
+    Command: {type: object, required: [command_id, tenant_id, corelink_device_id, command_type, payload, status, attempt_count, metadata, created_at, updated_at], properties: {command_id: {type: string, format: uuid}, tenant_id: {type: string, format: uuid}, corelink_device_id: {type: string, format: uuid}, command_type: {type: string}, payload: {type: object, additionalProperties: true}, status: {$ref: '#/components/schemas/CommandStatus'}, attempt_count: {type: integer}, timeout_at: {type: [string, 'null'], format: date-time}, acknowledged_at: {type: [string, 'null'], format: date-time}, completed_at: {type: [string, 'null'], format: date-time}, error_code: {type: [string, 'null'], maxLength: 100}, metadata: {type: object, additionalProperties: true}, created_at: {type: string, format: date-time}, updated_at: {type: string, format: date-time}}}
+    CommandPage: {type: object, required: [items, total, limit, offset], properties: {items: {type: array, items: {$ref: '#/components/schemas/Command'}}, total: {type: integer}, limit: {type: integer}, offset: {type: integer}}}
+    Problem: {type: object, required: [type, title, status, code, correlation_id], properties: {type: {type: string}, title: {type: string}, status: {type: integer}, code: {type: string}, detail: {type: string}, diagnostics: {type: object, additionalProperties: true}, correlation_id: {type: string}}}

@@ -13,30 +13,31 @@ SDK, CLI, mock server, MCP server and external integration.
 | `openapi/corelink-internal-v1.yaml` | Internal service contract; never expose as public API |
 | `asyncapi/corelink-events-v1.yaml` | Published event channels and payloads |
 | `schemas/` | Reusable JSON Schemas for device, command, event envelope and errors |
-| `postman/` | Collections, environments and runnable examples |
+| `postman/` | Versioned collection, sandbox environment and runnable examples |
 | `docs/terminology.md` | Shared public-contract vocabulary |
 
 ## Current status
 
-The public OpenAPI document now contains a reviewed draft for the locally
-verified Tenant → Device → Provisioning → Command slice, and AsyncAPI contains
-a draft command-event envelope. The admin and internal documents remain
-incomplete. These drafts are not stable release
-contract and must not be used to publish an SDK or claim full API
-compatibility until API-01/API-02 acceptance and cross-repository validation
-are complete.
+P3.1 introduces a reviewed `1.0.0-draft` public contract for the proven Device
+and Command slice, plus a canonical event envelope. It is intentionally a
+small boundary: tenant provisioning, integration callbacks and privileged
+administration remain out of public v1 until they have their own reviewed
+contract. SDKs and the mock server may consume this draft only in prerelease
+channels; it is not a release claim until runtime parity and CI checks land.
 
 ## Contract rules
 
 - Public device identity is `corelink_device_id`; integration IDs remain
   internal implementation details.
-- Model CoreLink resources, not raw upstream-provider payloads. Public
-  terminology uses neutral CoreLink names and the `tc`/`or` codes only.
+- Model CoreLink resources, not raw integration-provider payloads.
 - Keep public, admin and internal audiences in separate documents.
 - Define authentication, tenant scope, authorization failures, pagination,
   idempotency and problem responses for every operation.
 - Make breaking changes through an explicit versioned contract and coordinated
   platform/SDK release.
+
+Read [the compatibility policy](docs/compatibility-policy.md) before changing a
+public operation.
 
 ## Before merging a contract change
 
@@ -46,3 +47,6 @@ are complete.
 3. Add representative request, response and error examples.
 4. Update affected SDK, mock-server, developer-docs and website references in
    the same delivery plan.
+5. Let the contract-compatibility workflow classify the public diff. It rejects
+   breaking v1 changes; publish a new major document with migration guidance
+   for any such change.

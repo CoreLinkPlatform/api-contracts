@@ -12,25 +12,39 @@ on:
       - ".github/workflows/contract-compatibility.yml"
   push:
     branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   public-openapi:
-    runs-on: ubuntu-24.04
+    runs-on: blacksmith-2vcpu-ubuntu-2404
+    timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Parse versioned contracts
         run: |
           ruby -e 'require "yaml"; %w[openapi/corelink-public-v1.yaml openapi/corelink-admin-v1.yaml openapi/corelink-internal-v1.yaml asyncapi/corelink-events-v1.yaml].each { |path| YAML.safe_load(File.read(path), permitted_classes: [], aliases: false); puts "parsed #{path}" }'
           ruby -rjson -e 'Dir["schemas/*.json"].each { |path| JSON.parse(File.read(path)); puts "parsed #{path}" }'
-      - name: Reject unversioned breaking public changes
+      - name: Reject unversioned breaking public changes on pull requests
         if: github.event_name == 'pull_request'
         run: |
           git show "origin/${{ github.base_ref }}:openapi/corelink-public-v1.yaml" > /tmp/base-public.yaml || true
           ruby scripts/check_openapi_compatibility.rb /tmp/base-public.yaml openapi/corelink-public-v1.yaml
+      - name: Verify compatibility with immutable Device and Command baseline
+        run: |
+          git show v1.0.0-draft:openapi/corelink-public-v1.yaml > /tmp/immutable-public.yaml
+          ruby scripts/check_openapi_compatibility.rb /tmp/immutable-public.yaml openapi/corelink-public-v1.yaml
       - name: Lint public contract and examples
         run: ruby scripts/lint_contracts.rb
+      - name: Record immutable provenance
+        run: |
+          printf '%s\n' \
+            'contract=openapi/corelink-public-v1.yaml' \
+            'baseline=v1.0.0-draft' \
+            "candidate=${GITHUB_SHA}" \
+            "blob=$(git hash-object openapi/corelink-public-v1.yaml)" \
+            | tee /tmp/corelink-contract-provenance.txt

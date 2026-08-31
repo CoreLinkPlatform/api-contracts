@@ -1,5 +1,11 @@
 # CoreLink API Contracts
 
+[![Contract: 1.0.0-draft](https://img.shields.io/badge/public%20contract-1.0.0--draft-blue)](https://github.com/CoreLinkPlatform/api-contracts/releases)
+[![Contract compatibility](https://github.com/CoreLinkPlatform/api-contracts/actions/workflows/contract-compatibility.yml/badge.svg?branch=main)](https://github.com/CoreLinkPlatform/api-contracts/actions/workflows/contract-compatibility.yml)
+[![Maturity: Draft](https://img.shields.io/badge/maturity-draft-orange)](https://github.com/CoreLinkPlatform/.github/blob/main/REPOSITORY_MATURITY.md)
+[![OpenAPI](https://img.shields.io/badge/OpenAPI-v1-6BA539)](openapi/corelink-public-v1.yaml)
+[![AsyncAPI](https://img.shields.io/badge/AsyncAPI-events-2D8CFF)](asyncapi/corelink-events-v1.yaml)
+
 Versioned, implementation-independent contracts for CoreLink APIs and events. This repository is the normative machine-readable handoff boundary between the Platform runtime and Console, SDKs, CLI, mock server, MCP server and external integrations.
 
 ## Contents

@@ -12,17 +12,29 @@ on:
       - ".github/workflows/contract-compatibility.yml"
   push:
     branches: [main]
+    paths:
+      - "openapi/corelink-public-v*.yaml"
+      - "asyncapi/**"
+      - "schemas/**"
+      - "scripts/check_openapi_compatibility.rb"
+      - "scripts/lint_contracts.rb"
+      - "postman/**"
+      - ".github/workflows/contract-compatibility.yml"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: contract-compatibility-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   public-openapi:
     runs-on: blacksmith-2vcpu-ubuntu-2404
     timeout-minutes: 8
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Parse versioned contracts
